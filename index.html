@@ -60,12 +60,13 @@
         return;
       }
 
-      fetch('YOUR_APPS_SCRIPT_WEB_APP_URL', {
+        fetch('https://script.google.com/macros/s/AKfycbwKCi4ZoAl5-stStUtUpoSg8WOpV9Txd2k3f65K9LfQlx0aUZico9sNvlG0OnWVdVM/exec', {
         method: 'POST',
         body: JSON.stringify({
           name, project, notes, latitude, longitude, imageData
         }),
         headers: { 'Content-Type': 'application/json' }
+      })
       })
       .then(res => res.text())
       .then(msg => document.getElementById('status').innerText = msg)
