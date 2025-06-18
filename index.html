@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Timekeeping App</title>
+  <style>
+    body { font-family: sans-serif; padding: 16px; }
+    video, canvas { width: 100%; max-width: 320px; margin-bottom: 12px; }
+    button { padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h2>Timekeeping</h2>
+  <label>Name:</label><br>
+  <input type="text" id="name"><br><br>
+
+  <label>Project:</label><br>
+  <input type="text" id="project"><br><br>
+
+  <label>Notes:</label><br>
+  <input type="text" id="notes"><br><br>
+
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <button onclick="capture()">Take Selfie</button><br><br>
+
+  <button onclick="submitData()">Submit Entry</button>
+  <p id="status"></p>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => { video.srcObject = stream; })
+      .catch(err => alert("Camera not supported: " + err));
+
+    let latitude = "", longitude = "";
+    navigator.geolocation.getCurrentPosition(pos => {
+      latitude = pos.coords.latitude;
+      longitude = pos.coords.longitude;
+    }, err => alert("Location access failed: " + err.message));
+
+    function capture() {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      document.getElementById('status').innerText = "✅ Selfie captured.";
+    }
+
+    function submitData() {
+      const name = document.getElementById('name').value.trim();
+      const project = document.getElementById('project').value.trim();
+      const notes = document.getElementById('notes').value.trim();
+      const imageData = canvas.toDataURL('image/jpeg');
+
+      if (!name || !project || !imageData) {
+        alert("Please fill out all fields and take a selfie.");
+        return;
+      }
+
+      fetch('YOUR_APPS_SCRIPT_WEB_APP_URL', {
+        method: 'POST',
+        body: JSON.stringify({
+          name, project, notes, latitude, longitude, imageData
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.text())
+      .then(msg => document.getElementById('status').innerText = msg)
+      .catch(err => alert("Error submitting entry: " + err.message));
+    }
+  </script>
+</body>
+</html>
